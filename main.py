@@ -6,6 +6,8 @@ from random import random, seed
 class Main():
     def __init__(self):
         self.root = Tk()
+        self.root.title("Bong V.2.0")
+        self.paused = False
         self.width = self.root.winfo_screenwidth()
         self.height = self.root.winfo_screenheight()
         self.root.geometry("{}x{}".format(self.width, self.height))
@@ -29,12 +31,23 @@ class Main():
 
 
     def kr(self, event=None):
-        self.root.destroy()
+        if not self.paused:
+            self.paused = True
+            self.quit = self.c.create_rectangle(self.width / 2 - 150, self.height / 2 - 25, self.width / 2 + 150, self.height / 2 + 25, fill="#8a8a8a", outline="#8a8a8a", activeoutline="#00ddff")
+            self.quittxt = self.c.create_text(self.width / 2, self.height / 2, text="Quit Game.")
+            self.c.tag_bind(self.quit, "<Button-1>", lambda e: self.root.destroy())
+            self.c.tag_bind(self.quittxt, "<Button-1>", lambda e: self.root.destroy())
+        else:
+            self.paused = False
+            self.c.delete(self.quit)
+            self.c.delete(self.quittxt)
+            self.afterloop()
 
 
     def motion(self, event=None):
         self.coords = self.c.coords(self.platform)
-        self.c.coords(self.platform, event.x - 50, self.coords[1], event.x + 50, self.coords[3])
+        if not self.paused:
+            self.c.coords(self.platform, event.x - 50, self.coords[1], event.x + 50, self.coords[3])
 
 
     def afterloop(self):
@@ -44,7 +57,9 @@ class Main():
            self.speedx *= -1
         elif (self.bcoords[1] <= 0) or ((self.coords[0] <= self.bcoords[0] <= self.coords[2] or self.coords[0] <= self.bcoords[2] <= self.coords[2]) and self.bcoords[3] >= (self.height - self.height / 6) - 6 >= self.bcoords[1]):
             self.speedy *= -1
-            self.c.move(self.ball, 0, -self.speedy)
-        self.root.after(16, self.afterloop)
+            if ((self.coords[0] <= self.bcoords[0] <= self.coords[2] or self.coords[0] <= self.bcoords[2] <= self.coords[2]) and self.bcoords[3] >= (self.height - self.height / 6) - 6 >= self.bcoords[1]):
+                self.c.coords(self.ball, self.bcoords[0], (self.height - self.height / 6) - 106, self.bcoords[2], (self.height - self.height / 6) - 6)
+        if not self.paused:
+            self.root.after(16, self.afterloop)
 
 game = Main()
